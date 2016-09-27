@@ -1,0 +1,76 @@
+(*******EIGSEND CODE*******)
+
+
+
+Clear[EigSend, SourceVex, projers, Tsend];
+EigSend = {};
+SourceVex = {};
+projers = {};
+IniState = rout;
+(*PartialTranspose[DDD_]:=(
+Table[ppp[i,j]=DDD[[i,j]],{i,1,4},{j,1,4}];
+Return[{{ppp[1,1],ppp[2,1],ppp[1,3],ppp[2,3]},{ppp[1,2],ppp[2,2],ppp[\
+1,4],ppp[2,4]},{ppp[3,1],ppp[4,1],ppp[3,3],ppp[4,3]},{ppp[3,2],ppp[4,\
+2],ppp[3,4],ppp[4,4]}}];);*)
+(*sphere[u_,v_]:={Cos[u]Cos[v],Sin[u]Cos[v],Sin[v]};*)
+Do[
+  Clear[\[Rho]a, \[Rho]b, BB, CC, DD, bb, cc, dd, CorrMat, BlochA,
+   BlochB, \[Gamma], T, BlochAT, \[Rho]PT, sols, a1, b1, c1, a2, b2,
+   c2, a3, b3, c3, ppp];
+  \[Rho]a = dTraceSystem[IniState[[ii]], {2}, 2];
+  \[Rho]b = dTraceSystem[IniState[[ii]], {1}, 2];
+  BB = Tr[PauliMatrix[1].\[Rho]a];
+  CC = Tr[PauliMatrix[2].\[Rho]a];
+  DD = Tr[PauliMatrix[3].\[Rho]a];
+
+  bb = Tr[PauliMatrix[1].\[Rho]b];
+  cc = Tr[PauliMatrix[2].\[Rho]b];
+  dd = Tr[PauliMatrix[3].\[Rho]b];
+
+  BlochA = Flatten[{BB, CC, DD}(*/.sols1*)];
+  BlochB = Flatten[{bb, cc, dd}(*/.sols2*)];
+
+  (*BlochAsend[ii]=BlochA;
+  BlochBsend[ii]=BlochB;*)
+  CorrMat = Table[
+    (Tr[IniState[[ii]].KroneckerProduct[PauliMatrix[kk],
+        IdentityMatrix[2]].KroneckerProduct[IdentityMatrix[2],
+        PauliMatrix[jj]]])
+    , {kk, 1, 3}, {jj, 1, 3}];
+
+  If[Norm[BlochB // Chop] > 0,
+   Clear[\[Gamma], BlochAT];
+   \[Gamma] = 1/Sqrt[1 - Norm[BlochB]^2];
+   (*BlochAT=\[Gamma]^2(BlochA-CorrMat.BlochB);*)
+   (*BlochATsend[ii]=BlochAT;*)
+   T = ((\[Gamma]) (CorrMat -
+         KroneckerProduct[BlochA, BlochB])).(IdentityMatrix[
+        3] + ((((\[Gamma] - 1)/(Norm[BlochB]^2)) /.
+           Indeterminate -> 0) KroneckerProduct[BlochB, BlochB]));
+   Tsend[ii] = ((T.ConjugateTranspose[T]));
+   (*ellipsoid[ii]=BlochAT+T.{ Cos[u] Cos[v],Sin[u] Cos[v],Sin[v]};*),
+   Tsend[ii] = ((CorrMat.ConjugateTranspose[CorrMat]));
+   ];
+  AppendTo[EigSend, Chop[Eigenvectors[Tsend[ii]]]];(*
+  EigSend={{{-1,0,0},{0,-1,0},{0,0,-1}}};*)
+  , {ii, 1, iteration}];
+
+
+
+
+(*****OPT PROJ CODE*********)
+
+
+SourceVex3 = {};
+Do[
+  Do[
+    AppendTo[SourceVex3,
+      SetPrecision[(EigSend[[ii, jj]].{PauliMatrix[1], PauliMatrix[2],
+           PauliMatrix[3]}), 17]];
+
+    , {jj, 1, 3}];
+  , {ii, 1, Length[EigSend]}];
+Export["OptProjDM.mat", rout, "Data"]
+Length[rout]
+Export["OptProjTest.mat", SourceVex3, "Data"]
+Length[SourceVex3]
