@@ -1,6 +1,8 @@
 README
 
-The following two files are matlab editor files which can be used alongside the package cvx http://cvxr.com/cvx/ to calculated the EPR steering for two computable measures of it.
+The optimalprojectors.nb file is a mathematica file which takes input density matrices and outputs a set of Pauli Matrix combinations for determining the projectors for use in the matlab file steerableweightoptproj.m
+
+The other two files are matlab editor files which can be used alongside the package cvx http://cvxr.com/cvx/ to calculated the EPR steering for two computable measures of it.
 Make sure cvx is unpacked and that the filename loaded is something.mat, it should be a list of 4x4 matrices.
 
 Unfortunately the convex optimisation proceedure is not so easily computable. Most computers are limited to looking at 5000 sets of desnity matrices within a reasonable timeframe
